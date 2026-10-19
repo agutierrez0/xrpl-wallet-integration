@@ -105,9 +105,17 @@ body,
 
 /* Narrow screens have no room for the "/" keyboard shortcut hint, and it doesn't apply on
    touch anyway; dropping it keeps the search placeholder from being clipped. */
+.select-placeholder-short {
+  display: none;
+}
+
 @media (max-width: 576px) {
-  .select-shortcut-hint {
+  .select-shortcut-hint,
+  .select-placeholder-long {
     display: none;
+  }
+  .select-placeholder-short {
+    display: inline;
   }
 }
 

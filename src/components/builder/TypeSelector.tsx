@@ -127,8 +127,11 @@ export function TypeSelector({
         value={value}
         placeholder={
           <>
-            Search or choose a transaction type{" "}
-            <span className="select-shortcut-hint">(press / to focus)</span>
+            <span className="select-placeholder-long">
+              Search or choose a transaction type{" "}
+              <span className="select-shortcut-hint">(press / to focus)</span>
+            </span>
+            <span className="select-placeholder-short">Search transaction types</span>
           </>
         }
         options={options}
