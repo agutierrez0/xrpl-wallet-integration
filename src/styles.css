@@ -103,6 +103,44 @@ body,
   }
 }
 
+/* Narrow screens have no room for the "/" keyboard shortcut hint, and it doesn't apply on
+   touch anyway; dropping it keeps the search placeholder from being clipped. */
+.select-placeholder-short {
+  display: none;
+}
+
+@media (max-width: 576px) {
+  .select-shortcut-hint,
+  .select-placeholder-long {
+    display: none;
+  }
+  .select-placeholder-short {
+    display: inline;
+  }
+}
+
+/* Comfortable tap targets on touch devices: the mode switch, inline text links and wallet
+   install links are otherwise well under the ~44px minimum. Desktop (fine pointer) is untouched. */
+@media (pointer: coarse), (max-width: 576px) {
+  .mode-switch .ant-segmented-item-label {
+    min-height: 44px;
+    line-height: 44px;
+  }
+
+  .inline-link.ant-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 4px;
+  }
+
+  .wallet-hint a.ant-typography {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
 /* Mainnet is real money: a thin red bar above everything, set via <html data-network> */
 html[data-network="mainnet"]::before {
   content: "";
