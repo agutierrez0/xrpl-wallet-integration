@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TxEditor, describeDropped } from "./TxEditor";
 
@@ -81,6 +82,39 @@ describe("fields dropped when opening a transaction as a form", () => {
       account: NEW,
     });
     expect(screen.getByText(/Fee, Sequence are filled in automatically/)).toBeTruthy();
+  });
+});
+
+function ControlledRaw() {
+  const [value, setValue] = useState("");
+  return (
+    <TxEditor
+      value={value}
+      signing={false}
+      signLabel="Sign"
+      signingLabel="Signing…"
+      onChange={setValue}
+      onSign={() => {}}
+      onCancel={() => {}}
+    />
+  );
+}
+
+describe("raw JSON validation error timing", () => {
+  it("stays quiet until the user edits the text, then flags invalid JSON", () => {
+    render(<ControlledRaw />);
+    fireEvent.click(screen.getByRole("radio", { name: "Raw JSON" }));
+
+    const textarea = screen.getByLabelText("Transaction JSON");
+    expect(textarea.getAttribute("aria-invalid")).toBeNull();
+    expect(screen.getByText("Enter a transaction as JSON.").className).not.toMatch(
+      /ant-typography-danger/,
+    );
+
+    fireEvent.change(textarea, { target: { value: "{not valid" } });
+
+    expect(textarea.getAttribute("aria-invalid")).toBe("true");
+    expect(screen.getByText(/Invalid JSON/).className).toMatch(/ant-typography-danger/);
   });
 });
 

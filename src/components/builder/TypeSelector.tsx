@@ -125,7 +125,12 @@ export function TypeSelector({
         showSearch
         style={{ width: "100%" }}
         value={value}
-        placeholder="Search or choose a transaction type (press / to focus)"
+        placeholder={
+          <>
+            Search or choose a transaction type{" "}
+            <span className="select-shortcut-hint">(press / to focus)</span>
+          </>
+        }
         options={options}
         filterOption={false}
         searchValue={query}
@@ -141,7 +146,7 @@ export function TypeSelector({
         optionRender={(opt) => {
           const s = (opt.data as TypeOption).schema;
           return (
-            <Flex vertical>
+            <Flex vertical style={{ whiteSpace: "normal", wordBreak: "break-word" }}>
               <span>
                 <Typography.Text strong>{s.label}</Typography.Text>{" "}
                 <Typography.Text type="secondary" code>

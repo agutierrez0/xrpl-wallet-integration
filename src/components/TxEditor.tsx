@@ -127,6 +127,9 @@ export function TxEditor({
   const [values, setValues] = useState<FormValues>(initial?.values ?? {});
   // Text we can't show as a form (e.g. a custom tx) starts in raw mode.
   const [raw, setRaw] = useState(() => !!value.trim() && !initial);
+  // Whether the user has edited the raw text since entering raw mode: validation errors stay
+  // quiet until then, so switching to Raw JSON doesn't greet an empty box with a red error.
+  const [rawTouched, setRawTouched] = useState(false);
   const [rawNotice, setRawNotice] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [note, setNote] = useState<DroppedNote>(() => describeDropped(initial?.dropped));
@@ -174,6 +177,7 @@ export function TxEditor({
       onChange(buildText(s, r.values, account));
     } else {
       setRaw(true);
+      setRawTouched(false);
       setRawNotice("Custom transaction: shown as JSON because it has no form.");
       setNote({ loud: null, quiet: null });
       onChange(loadRequest.text);
@@ -246,6 +250,9 @@ export function TxEditor({
   };
 
   const rawError = raw ? validateTxText(value) : null;
+  // Raw mode opens on an empty or custom box; don't flag it red until the user has done
+  // something (typed, or tried to sign) that makes the error actually relevant to them.
+  const showRawError = raw && rawTouched && !!rawError;
   const needsType = !raw && !schema;
   // Hard-disabled: nothing a click could fix. Form errors are "soft": the click reveals them.
   const hardBlocked = !!rawError || needsType || !!disabledReason || !!staleAccount || busy;
@@ -269,7 +276,7 @@ export function TxEditor({
   let hint: { tone: "bad" | "muted"; text: string };
   if (staleAccount) {
     hint = { tone: "bad", text: "The JSON names a different account than the connected wallet." };
-  } else if (raw && rawError) hint = { tone: "bad", text: rawError };
+  } else if (raw && rawError) hint = { tone: rawTouched ? "bad" : "muted", text: rawError };
   else if (raw && rawNotice) hint = { tone: "bad", text: rawNotice };
   else if (needsType) hint = { tone: "muted", text: "Choose a transaction type to get started." };
   else if (softBlocked && firstError) {
@@ -292,7 +299,7 @@ export function TxEditor({
   // field doesn't re-announce the hint on every keystroke.
   const sigState = staleAccount
     ? "stale"
-    : raw && (rawError || rawNotice)
+    : raw && (showRawError || rawNotice)
       ? "raw-invalid"
       : needsType
         ? "needs-type"
@@ -319,6 +326,7 @@ export function TxEditor({
       title="Build and sign"
       extra={
         <Segmented
+          className="mode-switch"
           aria-label="Editor mode"
           value={raw ? "raw" : "form"}
           disabled={locked}
@@ -329,6 +337,7 @@ export function TxEditor({
           onChange={(next) => {
             if (next === "raw" && !raw) {
               setRaw(true);
+              setRawTouched(false);
               setRawNotice(null);
             } else if (next === "form" && raw) leaveRaw();
           }}
@@ -339,15 +348,18 @@ export function TxEditor({
         {raw ? (
           <Input.TextArea
             aria-label="Transaction JSON"
-            aria-invalid={rawError ? true : undefined}
+            aria-invalid={showRawError ? true : undefined}
             aria-describedby="tx-hint"
-            status={rawError ? "error" : undefined}
+            status={showRawError ? "error" : undefined}
             spellCheck={false}
             autoSize={{ minRows: 12, maxRows: 28 }}
             value={value}
             readOnly={locked}
             style={{ fontFamily: token.fontFamilyCode }}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => {
+              setRawTouched(true);
+              onChange(e.target.value);
+            }}
           />
         ) : (
           <TxBuilder
