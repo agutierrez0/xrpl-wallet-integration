@@ -14,6 +14,11 @@ services:
     networks:
       - default
       - coolify
+    labels:
+      # web sits on two networks; without this Traefik can pick web's private-network IP,
+      # which it can't reach, so the site hangs after proxy refreshes while Coolify still
+      # reports healthy. Pin Traefik to the shared `coolify` network.
+      - traefik.docker.network=coolify
 
   server:
     build:
