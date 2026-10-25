@@ -19,7 +19,7 @@
     "@gemwallet/api": "^3.8.0",
     "@ledgerhq/hw-app-xrp": "^6.38.0",
     "@ledgerhq/hw-transport-webusb": "^6.35.0",
-    "antd": "^6.6.6",
+    "antd": "^6.6.7",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.23",
     "react": "^19.3.1",
